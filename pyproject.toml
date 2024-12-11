@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "opentariff"
+name = "open-tariff"
 version = "0.0.1"
 description = "An open-source tariff schema definition"
 authors = ["Future Energy Associates <hello@futureenergy.associates>"]
