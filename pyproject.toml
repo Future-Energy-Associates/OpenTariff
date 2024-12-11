@@ -1,9 +1,13 @@
 [tool.poetry]
 name = "open-tariff"
-version = "0.1.0"
-description = ""
-authors = ["Clem <clem@futureenergy.associates>"]
+version = "0.0.1"
+description = "An open-source tariff schema definition"
+authors = ["Future Energy Associates <hello@futureenergy.associates>"]
 readme = "README.md"
+
+[tool.setuptools]
+packages = ["opentariff"]  # Specifies the import name (module directory)
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
