@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf8", errors="ignore") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="OpenTariff",
+    name="open-tariff",
     version="0.0.1",
     author="Future Energy Associates",
     author_email="hello@futureenergy.associates",
