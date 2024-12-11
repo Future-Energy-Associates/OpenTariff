@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/opentariff
+      url: https://pypi.org/p/open-tariff
     permissions:
       id-token: write
     steps:
