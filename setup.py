@@ -19,4 +19,5 @@ setuptools.setup(
         "Development Status :: 3 - Alpha",
     ],
     python_requires=">=3.11",
+    import_name="opentariff",
 )
