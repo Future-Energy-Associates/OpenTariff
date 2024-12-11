@@ -6,7 +6,10 @@ authors = ["Future Energy Associates <hello@futureenergy.associates>"]
 readme = "README.md"
 
 [tool.setuptools]
-packages = ["opentariff"]  # Specifies the import name (module directory)
+packages = ["opentariff"]
+
+[tool.poetry.include]
+opentariff = true
 
 
 [tool.poetry.dependencies]
