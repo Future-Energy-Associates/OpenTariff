@@ -1,12 +1,9 @@
 [tool.poetry]
-name = "open-tariff"
+name = "opentariff"
 version = "0.0.1"
 description = "An open-source tariff schema definition"
 authors = ["Future Energy Associates <hello@futureenergy.associates>"]
 readme = "README.md"
-
-# `packages` field identifies the Python package directory
-packages = ["opentariff"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
