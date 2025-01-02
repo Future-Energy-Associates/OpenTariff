@@ -63,8 +63,18 @@ class TariffEnums:
         DIRECT_DEBIT = "direct_debit"
         PREPAYMENT = "prepayment"
         CASH_CHEQUE = "cash_cheque"
+    
+    class TCRBandType(str, EnumBase):
+        line_loss = "line_loss"
+        consumption = "consumption"
 
-
+class TCRBAND_SUGGESTION(BaseModel):
+    tcrbandtpye: TariffEnums.TCRBandType
+    max_consumption: Decimal
+    min_consumption: Decimal
+    line_loss: Decimal
+    standing_charge: Decimal
+    
 class OtherProduct(BaseModel):
     """Represents additional products that can be bundled with tariffs"""
 
