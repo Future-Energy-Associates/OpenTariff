@@ -69,7 +69,7 @@ class TariffEnums:
         consumption = "consumption"
 
 class TCRBAND_SUGGESTION(BaseModel):
-    tcrbandtpye: TariffEnums.TCRBandType
+    tcrbandtype: TariffEnums.TCRBandType
     max_consumption: Decimal
     min_consumption: Decimal
     line_loss: Decimal
