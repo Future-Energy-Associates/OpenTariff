@@ -38,18 +38,29 @@ class TariffType(str, enum.Enum):
     fixed = "fixed"
     variable = "variable"
 
+
 class ExitFeeType(str, enum.Enum):
     fixed = "fixed"
     perc_of_balance = "perc_of_contract_balance"
+
 
 class PaymentMethod(str, enum.Enum):
     direct_debit = "direct_debit"
     prepayment = "prepayment"
     cash_cheque = "cash_cheque"
 
+
 class OtherProductsType(str, enum.Enum):
     utility = "utility"
     physical_asset = "physical_asset"
+
+
+class Tracker(str | None, enum.Enum):
+    non_commodity = "non_commodity"
+    day_ahead = "day_ahead"
+    intraday = "intraday"
+    price_cap = "price_cap"
+
 
 class OtherProducts(BaseModel):
     type: OtherProductsType
@@ -66,6 +77,8 @@ class ProductAttributes(BaseModel):
     collective_switch: bool | None = None
     green_percentage: float | None = None
     bundled_products: list[OtherProducts] | None = None
+    tracker: Tracker | None = None
+    creditTracker: bool | None = None
 
 
 class Product(BaseModel):
@@ -80,8 +93,8 @@ class Product(BaseModel):
 
 class Tariff(BaseModel):
     dno_region: int = Field(..., ge=10, le=23)
-    rate_type: RateType 
-    fuel_type: Fuel 
+    rate_type: RateType
+    fuel_type: Fuel
     payment_method: PaymentMethod
     tcr_band: TCRBand | None = None
     standing_charge: float
@@ -89,6 +102,7 @@ class Tariff(BaseModel):
     end_date: datetime.date | None = None
     exit_fee_type: ExitFeeType | None = None
     exit_fee_value: float | None = None
+
 
 class RateBase(BaseModel):
     unit_rate: float = Field(..., gt=0, lt=100)
@@ -107,7 +121,7 @@ class TimeofUseRateStatic(RateBase):
     month_from: int = Field(..., ge=1, le=12)
     month_to: int = Field(..., ge=1, le=12)
 
+
 class TimeOfUseRateDynamic(RateBase):
     datetime: datetime.datetime
     dst: bool | None = Field(default=None)
-
