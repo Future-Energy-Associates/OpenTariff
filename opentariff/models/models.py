@@ -13,14 +13,13 @@ class EnumBase:
 
 
 class DayOfWeek(int, EnumBase):
-    ALL = 0
-    MONDAY = 1
-    TUESDAY = 2
-    WEDNESDAY = 3
-    THURSDAY = 4
-    FRIDAY = 5
-    SATURDAY = 6
-    SUNDAY = 7
+    MONDAY = 0
+    TUESDAY = 1
+    WEDNESDAY = 2
+    THURSDAY = 3
+    FRIDAY = 4
+    SATURDAY = 5
+    SUNDAY = 6
 
 
 class ProductEnums:
@@ -68,14 +67,15 @@ class TariffEnums:
         line_loss = "line_loss"
         consumption = "consumption"
 
-class TCRBAND_SUGGESTION(BaseModel):
+class StandingCharge(BaseModel):
+    tcr_band: TariffEnums.TCRBand
     tcrbandtype: TariffEnums.TCRBandType
     max_consumption: Decimal
     min_consumption: Decimal
     line_loss: Decimal
-    standing_charge: Decimal
+    value: Decimal
     
-class OtherProduct(BaseModel):
+class BundledProduct(BaseModel):
     """Represents additional products that can be bundled with tariffs"""
 
     model_config = ConfigDict(frozen=True)
@@ -83,21 +83,6 @@ class OtherProduct(BaseModel):
     type: ProductEnums.OtherProductsType
     name: str
     description: Optional[str] = None
-
-
-class ProductAttributes(BaseModel):
-    """Product-specific attributes"""
-
-    model_config = ConfigDict(frozen=True)
-
-    smart: Optional[bool] = None
-    ev: Optional[bool] = None
-    exclusive: Optional[bool] = None
-    retention: Optional[bool] = None
-    acquisition: Optional[bool] = None
-    collective_switch: Optional[bool] = None
-    green_percentage: Optional[float] = Field(None, ge=0, le=100)
-    bundled_products: Optional[list[OtherProduct]] = None
 
 
 class Product(BaseModel):
@@ -109,9 +94,18 @@ class Product(BaseModel):
     domestic: bool
     description: Optional[str] = None
     type: Optional[ProductEnums.TariffType] = None
-    available_from: Optional[datetime] = None
+    available_from: datetime
     available_to: Optional[datetime] = None
-    attributes: Optional[ProductAttributes] = None
+
+    # Optional Attributes
+    smart: Optional[bool] = None
+    ev: Optional[bool] = None
+    exclusive: Optional[bool] = None
+    retention: Optional[bool] = None
+    acquisition: Optional[bool] = None
+    collective_switch: Optional[bool] = None
+    green_percentage: Optional[float] = Field(None, ge=0, le=100)
+    bundled_products: Optional[list[BundledProduct]] = None
 
     @field_validator("available_to")
     @classmethod
@@ -134,13 +128,13 @@ class Rate(BaseModel):
     # Fields for time-of-use static rates
     time_from: Optional[time] = None
     time_to: Optional[time] = None
-    day_of_week: Optional[DayOfWeek] = None
+    day_from: Optional[DayOfWeek] = None
+    day_to: Optional[DayOfWeek] = None
     month_from: Optional[int] = Field(None, ge=1, le=12)
     month_to: Optional[int] = Field(None, ge=1, le=12)
 
     # Fields for dynamic rates
     rate_datetime: Optional[datetime] = None
-    dst: Optional[bool] = None
 
     @field_validator("valid_to")
     @classmethod
@@ -196,15 +190,17 @@ class Tariff(BaseModel):
     rate_type: TariffEnums.RateType
     fuel_type: TariffEnums.Fuel
     payment_method: TariffEnums.PaymentMethod
-    tcr_band: Optional[TariffEnums.TCRBand] = None
-    standing_charge: Decimal = Field(..., ge=0)
     contract_length_months: Optional[int] = Field(None, gt=0)
-    end_date: Optional[date] = None
+    contract_end_date: Optional[date] = None
+    on_supply_from: Optional[datetime] = None
+    on_supply_to: Optional[datetime] = None
     exit_fee_type: Optional[TariffEnums.ExitFeeType] = None
     exit_fee_value: Optional[Decimal] = Field(None, ge=0)
+
+    standing_charges: list[StandingCharge]
     rates: list[Rate]
 
-    @field_validator("end_date")
+    @field_validator("contract_end_date")
     @classmethod
     def validate_end_date(cls, v: Optional[date]) -> Optional[date]:
         if v and v < date.today():
