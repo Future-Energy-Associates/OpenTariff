@@ -114,7 +114,6 @@ class Product(BaseModel):
             raise ValueError("available_to must be after available_from")
         return v
 
-
 class Rate(BaseModel):
     """Unified rate model for all rate types"""
 
@@ -196,7 +195,8 @@ class Tariff(BaseModel):
     on_supply_to: Optional[datetime] = None
     exit_fee_type: Optional[TariffEnums.ExitFeeType] = None
     exit_fee_value: Optional[Decimal] = Field(None, ge=0)
-
+    supplier_name: Optional[str] = None
+    supplier_tariff_code: Optional[str] = None
     standing_charges: list[StandingCharge]
     rates: list[Rate]
 
