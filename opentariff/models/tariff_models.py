@@ -3,69 +3,9 @@ from decimal import Decimal
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 
+from opentariff.Enums.base_enums import DayOfWeek
+from opentariff.Enums.tariff_enums import TariffEnums
 
-class EnumBase:
-    """Base class for enums to ensure consistent string representation"""
-
-    @classmethod
-    def values(cls) -> list:
-        return [member.value for member in cls]
-
-
-class DayOfWeek(int, EnumBase):
-    MONDAY = 0
-    TUESDAY = 1
-    WEDNESDAY = 2
-    THURSDAY = 3
-    FRIDAY = 4
-    SATURDAY = 5
-    SUNDAY = 6
-
-
-class ProductEnums:
-    """Group product-related enums"""
-
-    class TariffType(str, EnumBase):
-        FIXED = "fixed"
-        VARIABLE = "variable"
-
-    class OtherProductsType(str, EnumBase):
-        UTILITY = "utility"
-        PHYSICAL_ASSET = "physical_asset"
-
-
-class TariffEnums:
-    """Group tariff-related enums"""
-
-    class Fuel(str, EnumBase):
-        ELECTRICITY = "electricity"
-        GAS = "gas"
-        BOTH = "both"
-
-    class RateType(str, EnumBase):
-        SINGLE_RATE = "single_rate"
-        TIME_OF_USE_STATIC = "time_of_use_static"
-        TIME_OF_USE_DYNAMIC = "time_of_use_dynamic"
-        DEMAND_TIERED = "demand_tiered"
-
-    class TCRBand(str, EnumBase):
-        BAND_1 = "1"
-        BAND_2 = "2"
-        BAND_3 = "3"
-        BAND_4 = "4"
-
-    class ExitFeeType(str, EnumBase):
-        FIXED = "fixed"
-        PERC_OF_BALANCE = "perc_of_contract_balance"
-
-    class PaymentMethod(str, EnumBase):
-        DIRECT_DEBIT = "direct_debit"
-        PREPAYMENT = "prepayment"
-        CASH_CHEQUE = "cash_cheque"
-    
-    class TCRBandType(str, EnumBase):
-        line_loss = "line_loss"
-        consumption = "consumption"
 
 class StandingCharge(BaseModel):
     tcr_band: TariffEnums.TCRBand
@@ -75,45 +15,6 @@ class StandingCharge(BaseModel):
     line_loss: Decimal
     value: Decimal
     
-class BundledProduct(BaseModel):
-    """Represents additional products that can be bundled with tariffs"""
-
-    model_config = ConfigDict(frozen=True)
-
-    type: ProductEnums.OtherProductsType
-    name: str
-    description: Optional[str] = None
-
-
-class Product(BaseModel):
-    """Core product information"""
-
-    model_config = ConfigDict(frozen=True)
-
-    name: str
-    domestic: bool
-    description: Optional[str] = None
-    type: Optional[ProductEnums.TariffType] = None
-    available_from: datetime
-    available_to: Optional[datetime] = None
-
-    # Optional Attributes
-    smart: Optional[bool] = None
-    ev: Optional[bool] = None
-    exclusive: Optional[bool] = None
-    retention: Optional[bool] = None
-    acquisition: Optional[bool] = None
-    collective_switch: Optional[bool] = None
-    green_percentage: Optional[float] = Field(None, ge=0, le=100)
-    bundled_products: Optional[list[BundledProduct]] = None
-
-    @field_validator("available_to")
-    @classmethod
-    def validate_available_to(cls, v: Optional[datetime], info) -> Optional[datetime]:
-        if v and info.data.get("available_from") and v <= info.data["available_from"]:
-            raise ValueError("available_to must be after available_from")
-        return v
-
 class Rate(BaseModel):
     """Unified rate model for all rate types"""
 
