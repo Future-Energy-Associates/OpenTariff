@@ -22,8 +22,6 @@ class Rate(BaseModel):
 
     rate_type: TariffEnums.RateType
     unit_rate: Decimal = Field(..., gt=0, lt=100)
-    valid_from: Optional[datetime] = None
-    valid_to: Optional[datetime] = None
 
     # Fields for time-of-use static rates
     time_from: Optional[time] = None
