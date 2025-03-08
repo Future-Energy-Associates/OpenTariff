@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker container
+        run: docker compose build
+
+      - name: Run CI tasks
+        run: docker compose -f compose.yml -f compose.ci.yml run -i -T --rm opentariff make ci
+
