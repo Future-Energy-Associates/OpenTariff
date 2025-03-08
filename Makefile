@@ -31,3 +31,18 @@ pre-commit: lint.fix format typecheck
 
 .PHONY: ci
 ci: lint typecheck test.local
+
+.PHONY: release-tag
+
+# Usage: make release-tag VERSION=1.0.0
+release-tag:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is required. Use 'make release-tag VERSION=1.0.0'"; \
+		exit 1; \
+	fi
+	@echo "Creating and pushing tag v$(VERSION)..."
+	git checkout main
+	git pull
+	git tag -a v$(VERSION) -m "Release version $(VERSION)"
+	git push origin v$(VERSION)
+	@echo "Tag v$(VERSION) created and pushed successfully!"
