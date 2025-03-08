@@ -43,4 +43,3 @@ class Product(BaseModel):
         if v and info.data.get("available_from") and v <= info.data["available_from"]:
             raise ValueError("available_to must be after available_from")
         return v
-
