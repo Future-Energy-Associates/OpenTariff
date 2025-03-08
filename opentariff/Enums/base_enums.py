@@ -1,4 +1,7 @@
-class EnumBase:
+from enum import Enum
+
+
+class EnumBase(Enum):
     """Base class for enums to ensure consistent string representation"""
 
     @classmethod

@@ -9,6 +9,16 @@ readme = "README.md"
 python = "^3.11"
 pydantic = "^2.10.3"
 
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.9.10"
+mypy = "^1.15.0"
+pytest = "^8.3.5"
+pytest-cov = "^6.0.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "--cov=opentariff --cov-report=term --cov-report=html"
+testpaths = ["tests"]

@@ -14,7 +14,8 @@ class StandingCharge(BaseModel):
     min_consumption: Decimal
     line_loss: Decimal
     value: Decimal
-    
+
+
 class Rate(BaseModel):
     """Unified rate model for all rate types"""
 
@@ -47,7 +48,6 @@ class Rate(BaseModel):
         if v and info.data.get("day_from") and v == info.data["day_from"]:
             raise ValueError("day_to must not equal day_from")
         return v
-
 
     @field_validator("month_to")
     @classmethod

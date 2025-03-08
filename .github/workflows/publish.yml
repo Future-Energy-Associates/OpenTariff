@@ -1,8 +1,9 @@
-name: Upload Python Package to PyPI when a Release is Created
+name: Upload Python Package to PyPI on Version Tag
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v*'  # Push events to tags matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   pypi-publish:
