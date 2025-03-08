@@ -23,7 +23,7 @@ class Product(BaseModel):
     name: str
     domestic: bool
     description: Optional[str] = None
-    type: Optional[ProductEnums.TariffType] = None
+    type: ProductEnums.TariffType
     available_from: datetime
     available_to: Optional[datetime] = None
 

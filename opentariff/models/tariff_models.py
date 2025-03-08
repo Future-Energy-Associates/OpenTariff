@@ -34,25 +34,26 @@ class Rate(BaseModel):
     # Fields for dynamic rates
     rate_datetime: Optional[datetime] = None
 
-    @field_validator("valid_to")
-    @classmethod
-    def validate_valid_to(cls, v: Optional[datetime], info) -> Optional[datetime]:
-        if v and info.data.get("valid_from") and v <= info.data["valid_from"]:
-            raise ValueError("valid_to must be after valid_from")
-        return v
-
     @field_validator("time_to")
     @classmethod
     def validate_time_to(cls, v: Optional[time], info) -> Optional[time]:
-        if v and info.data.get("time_from") and v <= info.data["time_from"]:
-            raise ValueError("time_to must be after time_from")
+        if v and info.data.get("time_from") and v == info.data["time_from"]:
+            raise ValueError("time_to must not equal time_from")
         return v
+
+    @field_validator("day_to")
+    @classmethod
+    def validate_day_to(cls, v: Optional[time], info) -> Optional[time]:
+        if v and info.data.get("day_from") and v == info.data["day_from"]:
+            raise ValueError("day_to must not equal day_from")
+        return v
+
 
     @field_validator("month_to")
     @classmethod
     def validate_month_to(cls, v: Optional[int], info) -> Optional[int]:
-        if v and info.data.get("month_from") and v < info.data["month_from"]:
-            raise ValueError("month_to must be after or equal to month_from")
+        if v and info.data.get("month_from") and v == info.data["month_from"]:
+            raise ValueError("month_to must not equal to month_from")
         return v
 
     @field_validator("rate_type")
@@ -98,13 +99,6 @@ class Tariff(BaseModel):
     supplier_tariff_code: Optional[str] = None
     standing_charges: list[StandingCharge]
     rates: list[Rate]
-
-    @field_validator("contract_end_date")
-    @classmethod
-    def validate_end_date(cls, v: Optional[date]) -> Optional[date]:
-        if v and v < date.today():
-            raise ValueError("end_date cannot be in the past")
-        return v
 
     @field_validator("rates")
     @classmethod
