@@ -13,7 +13,15 @@ RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python
 COPY pyproject.toml poetry.lock README.md ./
 
 ARG INSTALL_DEV=false
-RUN bash -c "if [ \"$INSTALL_DEV\" = \"true\" ] ; then poetry install --no-root ; else poetry install --no-root --only main ; fi"
+RUN echo "INSTALL_DEV value: ${INSTALL_DEV}"
+RUN if [ "${INSTALL_DEV}" = "true" ]; then \
+        echo "Installing WITH dev dependencies" && \
+        poetry install --no-root && \
+        poetry show | grep ruff; \
+    else \
+        echo "Installing WITHOUT dev dependencies" && \
+        poetry install --no-root --only main; \
+    fi
 
 ENV PYTHONPATH=/app
 
