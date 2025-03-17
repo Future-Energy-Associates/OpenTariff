@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "OpenTariff"
-version = "0.0.1"
+version = "1.0.0"
 description = "An open-source tariff schema definition"
 authors = ["Future Energy Associates <hello@futureenergy.associates>"]
 readme = "README.md"
