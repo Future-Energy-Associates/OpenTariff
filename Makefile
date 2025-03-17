@@ -38,12 +38,11 @@ release-tag:
 		echo "Error: VERSION is required. Use 'make release-tag VERSION=1.0.0'"; \
 		exit 1; \
 	fi
-	@if [ -n "$(shell git status --porcelain)" ]; then \
-		echo "Error: Working directory is not clean. Commit or stash changes first."; \
-		exit 1; \
-	fi
 	@echo "Updating version to $(VERSION) in pyproject.toml..."
-	sed -i 's/^version = ".*"/version = "$(VERSION)"/' pyproject.toml
+	@python -c "import re; \
+		content = open('pyproject.toml', 'r').read(); \
+		new_content = re.sub(r'version = \".*\"', f'version = \"$(VERSION)\"', content); \
+		open('pyproject.toml', 'w').write(new_content)"
 	@echo "Committing version change..."
 	git add pyproject.toml
 	git commit -m "Bump version to $(VERSION)"
