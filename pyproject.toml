@@ -6,7 +6,7 @@ authors = ["Future Energy Associates <hello@futureenergy.associates>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 pydantic = "^2.10.3"
 
 [tool.poetry.group.dev.dependencies]
