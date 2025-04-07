@@ -8,12 +8,12 @@ from opentariff.Enums.tariff_enums import TariffEnums
 
 
 class StandingCharge(BaseModel):
-    tcr_band: TariffEnums.TCRBand
-    tcrbandtype: TariffEnums.TCRBandType
-    max_consumption: Decimal
-    min_consumption: Decimal
-    line_loss: Decimal
-    value: Decimal
+    tcr_band: Optional[TariffEnums.TCRBand] = Field(default=None, ge=1, le=4)
+    tcrbandtype: Optional[TariffEnums.TCRBandType] = Field(default=None)
+    max_consumption: Optional[Decimal] = Field(default=None, gt=0)
+    min_consumption: Optional[Decimal] = Field(default=None, ge=0)
+    line_loss: Optional[Decimal] = Field(default=None, ge=0)
+    standing_charge: Decimal
 
 
 class Rate(BaseModel):
@@ -35,6 +35,10 @@ class Rate(BaseModel):
     # Fields for dynamic rates
     rate_datetime: Optional[datetime] = None
 
+    # Fields for consumption-based rates
+    consumption_from: Optional[Decimal] = None
+    consumption_to: Optional[Decimal] = None
+
     @field_validator("time_to")
     @classmethod
     def validate_time_to(cls, v: Optional[time], info) -> Optional[time]:
@@ -54,6 +58,15 @@ class Rate(BaseModel):
     def validate_month_to(cls, v: Optional[int], info) -> Optional[int]:
         if v and info.data.get("month_from") and v == info.data["month_from"]:
             raise ValueError("month_to must not equal to month_from")
+        return v
+    
+    @field_validator("consumption_to")
+    @classmethod
+    def validate_consumption_to(
+        cls, v: Optional[Decimal], info
+    ) -> Optional[Decimal]:
+        if v and info.data.get("consumption_from") and v <= info.data["consumption_from"]:
+            raise ValueError("consumption_to must be equal to or greater than consumption_from")
         return v
 
     @field_validator("rate_type")
