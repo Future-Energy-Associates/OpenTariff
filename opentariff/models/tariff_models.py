@@ -22,6 +22,7 @@ class Rate(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     rate_type: TariffEnums.RateType
+    fuel: TariffEnums.Fuel
     unit_rate: Decimal = Field(..., gt=0, lt=100)
 
     # Fields for time-of-use static rates
@@ -59,14 +60,18 @@ class Rate(BaseModel):
         if v and info.data.get("month_from") and v == info.data["month_from"]:
             raise ValueError("month_to must not equal to month_from")
         return v
-    
+
     @field_validator("consumption_to")
     @classmethod
-    def validate_consumption_to(
-        cls, v: Optional[Decimal], info
-    ) -> Optional[Decimal]:
-        if v and info.data.get("consumption_from") and v <= info.data["consumption_from"]:
-            raise ValueError("consumption_to must be equal to or greater than consumption_from")
+    def validate_consumption_to(cls, v: Optional[Decimal], info) -> Optional[Decimal]:
+        if (
+            v
+            and info.data.get("consumption_from")
+            and v <= info.data["consumption_from"]
+        ):
+            raise ValueError(
+                "consumption_to must be equal to or greater than consumption_from"
+            )
         return v
 
     @field_validator("rate_type")
@@ -100,7 +105,7 @@ class Tariff(BaseModel):
 
     dno_region: int = Field(..., ge=10, le=23)
     rate_type: TariffEnums.RateType
-    fuel_type: TariffEnums.Fuel
+    fuel_type: TariffEnums.FuelType
     payment_method: TariffEnums.PaymentMethod
     contract_length_months: Optional[int] = Field(None, gt=0)
     contract_end_date: Optional[date] = None
@@ -108,8 +113,8 @@ class Tariff(BaseModel):
     on_supply_to: Optional[datetime] = None
     exit_fee_type: Optional[TariffEnums.ExitFeeType] = None
     exit_fee_value: Optional[Decimal] = Field(None, ge=0)
-    supplier_name: Optional[str] = None
     supplier_tariff_code: Optional[str] = None
+    annual_cost: Optional[Decimal] = None
     standing_charges: list[StandingCharge]
     rates: list[Rate]
 

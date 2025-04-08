@@ -4,10 +4,14 @@ from opentariff.Enums.base_enums import EnumBase
 class TariffEnums:
     """Group tariff-related enums"""
 
-    class Fuel(str, EnumBase):
+    class FuelType(str, EnumBase):
         ELECTRICITY = "electricity"
         GAS = "gas"
         BOTH = "both"
+
+    class Fuel(str, EnumBase):
+        ELECTRICITY = "electricity"
+        GAS = "gas"
 
     class RateType(str, EnumBase):
         SINGLE_RATE = "single_rate"
