@@ -1,7 +1,7 @@
 from datetime import datetime, date, time
 from decimal import Decimal
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, model_validator
 
 from opentariff.Enums.base_enums import DayOfWeek
 from opentariff.Enums.tariff_enums import TariffEnums
@@ -40,6 +40,9 @@ class Rate(BaseModel):
     consumption_from: Optional[Decimal] = None
     consumption_to: Optional[Decimal] = None
 
+    # type of use static rates
+    consumption_type: Optional[TariffEnums.ConsumptionType] = None
+
     @field_validator("time_to")
     @classmethod
     def validate_time_to(cls, v: Optional[time], info) -> Optional[time]:
@@ -74,28 +77,18 @@ class Rate(BaseModel):
             )
         return v
 
-    @field_validator("rate_type")
-    @classmethod
-    def validate_rate_fields(
-        cls, v: TariffEnums.RateType, info
-    ) -> TariffEnums.RateType:
+    @model_validator(mode="after")
+    def validate_rate_fields(self):
         """Validate that required fields are present based on rate type"""
-        if v == TariffEnums.RateType.TIME_OF_USE_STATIC:
-            if not all(
-                [
-                    info.data.get("time_from"),
-                    info.data.get("time_to"),
-                    info.data.get("month_from"),
-                    info.data.get("month_to"),
-                ]
-            ):
-                raise ValueError(
-                    "time_of_use_static rates require time_from, time_to, month_from, and month_to"
-                )
-        elif v == TariffEnums.RateType.TIME_OF_USE_DYNAMIC:
-            if not info.data.get("rate_datetime"):
-                raise ValueError("time_of_use_dynamic rates require rate_datetime")
-        return v
+        rate_type = self.rate_type
+        required_fields = TariffEnums.RateType.get_required_fields(rate_type)
+
+        if required_fields and not all(
+            getattr(self, field, None) is not None for field in required_fields
+        ):
+            raise ValueError(f"{rate_type} rates require {', '.join(required_fields)}")
+
+        return self
 
 
 class Tariff(BaseModel):
