@@ -70,7 +70,7 @@ class Rate(BaseModel):
         if (
             v
             and info.data.get("consumption_from")
-            and v <= info.data["consumption_from"]
+            and v < info.data["consumption_from"]
         ):
             raise ValueError(
                 "consumption_to must be equal to or greater than consumption_from"
