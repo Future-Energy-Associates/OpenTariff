@@ -1,19 +1,19 @@
 from datetime import datetime, date, time
 from decimal import Decimal
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, model_validator
 
 from opentariff.Enums.base_enums import DayOfWeek
 from opentariff.Enums.tariff_enums import TariffEnums
 
 
 class StandingCharge(BaseModel):
-    tcr_band: TariffEnums.TCRBand
-    tcrbandtype: TariffEnums.TCRBandType
-    max_consumption: Decimal
-    min_consumption: Decimal
-    line_loss: Decimal
-    value: Decimal
+    tcr_band: Optional[TariffEnums.TCRBand] = Field(default=None, ge=1, le=4)
+    tcrbandtype: Optional[TariffEnums.TCRBandType] = Field(default=None)
+    max_consumption: Optional[Decimal] = Field(default=None, gt=0)
+    min_consumption: Optional[Decimal] = Field(default=None, ge=0)
+    line_loss: Optional[Decimal] = Field(default=None, ge=0)
+    standing_charge: Decimal
 
 
 class Rate(BaseModel):
@@ -22,6 +22,7 @@ class Rate(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     rate_type: TariffEnums.RateType
+    fuel: TariffEnums.Fuel
     unit_rate: Decimal = Field(..., gt=0, lt=100)
 
     # Fields for time-of-use static rates
@@ -34,6 +35,13 @@ class Rate(BaseModel):
 
     # Fields for dynamic rates
     rate_datetime: Optional[datetime] = None
+
+    # Fields for consumption-based rates
+    consumption_from: Optional[Decimal] = None
+    consumption_to: Optional[Decimal] = None
+
+    # type of use static rates
+    consumption_type: Optional[TariffEnums.ConsumptionType] = None
 
     @field_validator("time_to")
     @classmethod
@@ -56,28 +64,31 @@ class Rate(BaseModel):
             raise ValueError("month_to must not equal to month_from")
         return v
 
-    @field_validator("rate_type")
+    @field_validator("consumption_to")
     @classmethod
-    def validate_rate_fields(
-        cls, v: TariffEnums.RateType, info
-    ) -> TariffEnums.RateType:
-        """Validate that required fields are present based on rate type"""
-        if v == TariffEnums.RateType.TIME_OF_USE_STATIC:
-            if not all(
-                [
-                    info.data.get("time_from"),
-                    info.data.get("time_to"),
-                    info.data.get("month_from"),
-                    info.data.get("month_to"),
-                ]
-            ):
-                raise ValueError(
-                    "time_of_use_static rates require time_from, time_to, month_from, and month_to"
-                )
-        elif v == TariffEnums.RateType.TIME_OF_USE_DYNAMIC:
-            if not info.data.get("rate_datetime"):
-                raise ValueError("time_of_use_dynamic rates require rate_datetime")
+    def validate_consumption_to(cls, v: Optional[Decimal], info) -> Optional[Decimal]:
+        if (
+            v
+            and info.data.get("consumption_from")
+            and v < info.data["consumption_from"]
+        ):
+            raise ValueError(
+                "consumption_to must be equal to or greater than consumption_from"
+            )
         return v
+
+    @model_validator(mode="after")
+    def validate_rate_fields(self):
+        """Validate that required fields are present based on rate type"""
+        rate_type = self.rate_type
+        required_fields = TariffEnums.RateType.get_required_fields(rate_type)
+
+        if required_fields and not all(
+            getattr(self, field, None) is not None for field in required_fields
+        ):
+            raise ValueError(f"{rate_type} rates require {', '.join(required_fields)}")
+
+        return self
 
 
 class Tariff(BaseModel):
@@ -87,7 +98,7 @@ class Tariff(BaseModel):
 
     dno_region: int = Field(..., ge=10, le=23)
     rate_type: TariffEnums.RateType
-    fuel_type: TariffEnums.Fuel
+    fuel_type: TariffEnums.FuelType
     payment_method: TariffEnums.PaymentMethod
     contract_length_months: Optional[int] = Field(None, gt=0)
     contract_end_date: Optional[date] = None
@@ -95,8 +106,8 @@ class Tariff(BaseModel):
     on_supply_to: Optional[datetime] = None
     exit_fee_type: Optional[TariffEnums.ExitFeeType] = None
     exit_fee_value: Optional[Decimal] = Field(None, ge=0)
-    supplier_name: Optional[str] = None
     supplier_tariff_code: Optional[str] = None
+    annual_cost: Optional[Decimal] = None
     standing_charges: list[StandingCharge]
     rates: list[Rate]
 

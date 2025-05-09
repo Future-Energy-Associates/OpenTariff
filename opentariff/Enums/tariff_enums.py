@@ -4,16 +4,32 @@ from opentariff.Enums.base_enums import EnumBase
 class TariffEnums:
     """Group tariff-related enums"""
 
-    class Fuel(str, EnumBase):
+    class FuelType(str, EnumBase):
         ELECTRICITY = "electricity"
         GAS = "gas"
         BOTH = "both"
+
+    class Fuel(str, EnumBase):
+        ELECTRICITY = "electricity"
+        GAS = "gas"
 
     class RateType(str, EnumBase):
         SINGLE_RATE = "single_rate"
         TIME_OF_USE_STATIC = "time_of_use_static"
         TIME_OF_USE_DYNAMIC = "time_of_use_dynamic"
         DEMAND_TIERED = "demand_tiered"
+        TYPE_OF_USE = "type_of_use"
+
+        @classmethod
+        def get_required_fields(cls, rate_type) -> list[str]:
+            requirements = {
+                cls.SINGLE_RATE: [],
+                cls.TIME_OF_USE_STATIC: ["time_from", "time_to"],
+                cls.TIME_OF_USE_DYNAMIC: ["rate_datetime"],
+                cls.DEMAND_TIERED: ["consumption_from", "consumption_to"],
+                cls.TYPE_OF_USE: ["consumption_type"],
+            }
+            return requirements.get(rate_type, [])
 
     class TCRBand(str, EnumBase):
         BAND_1 = "1"
@@ -33,3 +49,8 @@ class TariffEnums:
     class TCRBandType(str, EnumBase):
         line_loss = "line_loss"
         consumption = "consumption"
+
+    class ConsumptionType(str, EnumBase):
+        ELECTRIC_VEHICLE = "electric_vehicle"
+        HEAT_PUMP = "heat_pump"
+        ANY = "any"

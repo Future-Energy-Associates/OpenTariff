@@ -26,6 +26,7 @@ class Product(BaseModel):
     type: ProductEnums.TariffType
     available_from: datetime
     available_to: Optional[datetime] = None
+    supplier_name: Optional[str] = None
 
     # Optional Attributes
     smart: Optional[bool] = None
